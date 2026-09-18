@@ -1,0 +1,30 @@
+name: iOS Tests
+
+on:
+  push:
+    branches: ["main"]
+  pull_request:
+    branches: ["main"]
+
+jobs:
+  test:
+    name: Build and test iOS app
+    runs-on: macos-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Show Xcode version
+        run: xcodebuild -version
+
+      - name: List available simulators
+        run: xcrun simctl list devices available
+
+      - name: Build and run all tests
+        run: |
+          xcodebuild test \
+            -project IOS-Weather-App.xcodeproj \
+            -scheme IOS-Weather-App \
+            -destination 'platform=iOS Simulator,name=iPhone 16,OS=latest' \
+            CODE_SIGNING_ALLOWED=NO
