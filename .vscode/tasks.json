@@ -1,0 +1,25 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Run unit tests on iPhone",
+      "type": "shell",
+      "command": "xcodebuild",
+      "args": [
+        "test",
+        "-project",
+        "IOS-Weather-App.xcodeproj",
+        "-scheme",
+        "IOS-Weather-App",
+        "-destination",
+        "platform=iOS,id=00008110-001835D41453801E",
+        "-allowProvisioningUpdates",
+      ],
+      "group": {
+        "kind": "test",
+        "isDefault": true
+      },
+      "problemMatcher": []
+    }
+  ]
+}

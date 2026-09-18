@@ -1,47 +1,49 @@
 import SwiftUI
 
 struct ContentView: View {
-
-    @state private var viewModel = WeatherViewModel()
-    @state private var showingSearch = false
-    @state private var showingHelp = false
+    // @State private var viewModel = WeatherViewModel()
+    // @State private var showingSearch = false
+    // @State private var showingHelp = false
+    @State private var lastAction = ""
 
     var body: some View {
         ZStack {
-            AppColors.background.ignoreSafeArea()
+            AppColors.background
+                .ignoresSafeArea()
 
-            VStack(spacing: 0) {
+            VStack(alignment: .leading) {
                 GreetingHeader(
-                    cityName: viewModel.cityName,
-                    condition: viewModel.condition,
-                    greeting: viewModel.greeting,
+                    cityName: "Glasgow",
+                    condition: "Raining",
+                    greeting: "Good Evening",
                     onSearchTapped: {
-                        showingSearch = true
+                        lastAction = "search tapped"
                     },
                     onHelpTapped: {
-                        showingHelp = true
+                        lastAction = "help tapped"
                     },
                     onRefreshTapped: {
-                        Task {
-                            await viewModel.refresh()
-                        }
+                        lastAction = "refresh tapped"
                     }
                 )
 
-                WeatherHeroView(
-                    temperature: viewModel.temperatureText,
-                    color: viewModel.weatherTheme.color,
-                )
+                Text(lastAction)
+                    .accessibilityIdentifier(actionIdentifier)
+                    .padding()
             }
         }
-        .sheet(isPresented: $showingSearch) {
-            SearchView()
-        }
-        .sheet(isPresented: $showingHelp) {
-            WeatherKeyView()
-        }
-        .task {
-            await viewModel.loadWeather()
+    }
+
+    private var actionIdentifier: String {
+        switch lastAction {
+        case "search tapped":
+            return "searchTappedMessage"
+        case "help tapped":
+            return "helpTappedMessage"
+        case "refresh tapped":
+            return "refreshTappedMessage"
+        default:
+            return "noActionMessage"
         }
     }
 }
