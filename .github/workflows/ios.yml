@@ -5,6 +5,7 @@ on:
     branches: ["main"]
   pull_request:
     branches: ["main"]
+  workflow_dispatch:
 
 jobs:
   test:
@@ -18,13 +19,49 @@ jobs:
       - name: Show Xcode version
         run: xcodebuild -version
 
-      - name: List available simulators
-        run: xcrun simctl list devices available
+      - name: Install iOS simulator runtime
+        run: |
+          xcodebuild -downloadPlatform iOS
+          xcrun simctl list runtimes
+          xcrun simctl list devices available
+
+      - name: Create test simulator
+        run: |
+          RUNTIME_ID=$(xcrun simctl list runtimes -j | ruby -rjson -e '
+            runtimes = JSON.parse(STDIN.read)["runtimes"]
+            runtime = runtimes
+              .select { |item| item["isAvailable"] && item["identifier"].include?("iOS") }
+              .max_by { |item| item["version"] }
+            puts runtime["identifier"]
+          ')
+
+          DEVICE_TYPE_ID=$(xcrun simctl list devicetypes -j | ruby -rjson -e '
+            deviceTypes = JSON.parse(STDIN.read)["devicetypes"]
+            device = deviceTypes.find { |item| item["name"] == "iPhone 17" }
+            abort("iPhone 17 device type not found") unless device
+            puts device["identifier"]
+          ')
+
+          xcrun simctl create "CI iPhone" "$DEVICE_TYPE_ID" "$RUNTIME_ID"
+          echo "SIMULATOR_NAME=CI iPhone" >> "$GITHUB_ENV"
+
+      - name: Boot test simulator
+        run: |
+          xcrun simctl boot "$SIMULATOR_NAME" || true
+          xcrun simctl bootstatus "$SIMULATOR_NAME" -b
 
       - name: Build and run all tests
         run: |
           xcodebuild test \
             -project IOS-Weather-App.xcodeproj \
             -scheme IOS-Weather-App \
-            -destination 'platform=iOS Simulator,name=iPhone 17,OS=latest' \
+            -destination "platform=iOS Simulator,name=$SIMULATOR_NAME" \
+            -resultBundlePath TestResults.xcresult \
             CODE_SIGNING_ALLOWED=NO
+
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ios-test-results
+          path: TestResults.xcresult
