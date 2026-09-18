@@ -32,30 +32,46 @@ jobs:
             runtime = runtimes
               .select { |item| item["isAvailable"] && item["identifier"].include?("iOS") }
               .max_by { |item| item["version"] }
+
+            abort("No available iOS Simulator runtime found") unless runtime
             puts runtime["identifier"]
           ')
 
           DEVICE_TYPE_ID=$(xcrun simctl list devicetypes -j | ruby -rjson -e '
-            deviceTypes = JSON.parse(STDIN.read)["devicetypes"]
-            device = deviceTypes.find { |item| item["name"] == "iPhone 17" }
+            device_types = JSON.parse(STDIN.read)["devicetypes"]
+            device = device_types.find { |item| item["name"] == "iPhone 17" }
+
             abort("iPhone 17 device type not found") unless device
             puts device["identifier"]
           ')
 
-          xcrun simctl create "CI iPhone" "$DEVICE_TYPE_ID" "$RUNTIME_ID"
-          echo "SIMULATOR_NAME=CI iPhone" >> "$GITHUB_ENV"
+          SIMULATOR_UDID=$(xcrun simctl create "CI iPhone" "$DEVICE_TYPE_ID" "$RUNTIME_ID")
+
+          echo "SIMULATOR_UDID=$SIMULATOR_UDID" >> "$GITHUB_ENV"
+
+          echo "Created simulator:"
+          xcrun simctl list devices | grep "$SIMULATOR_UDID"
 
       - name: Boot test simulator
         run: |
-          xcrun simctl boot "$SIMULATOR_NAME" || true
-          xcrun simctl bootstatus "$SIMULATOR_NAME" -b
+          xcrun simctl boot "$SIMULATOR_UDID"
+          xcrun simctl bootstatus "$SIMULATOR_UDID" -b
+
+      - name: Verify simulator destination
+        run: |
+          echo "Simulator UDID: $SIMULATOR_UDID"
+          xcrun simctl list devices
+          xcodebuild \
+            -project IOS-Weather-App.xcodeproj \
+            -scheme IOS-Weather-App \
+            -showdestinations
 
       - name: Build and run all tests
         run: |
           xcodebuild test \
             -project IOS-Weather-App.xcodeproj \
             -scheme IOS-Weather-App \
-            -destination "platform=iOS Simulator,name=$SIMULATOR_NAME" \
+            -destination "platform=iOS Simulator,id=$SIMULATOR_UDID" \
             -resultBundlePath TestResults.xcresult \
             CODE_SIGNING_ALLOWED=NO
 
