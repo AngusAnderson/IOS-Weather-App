@@ -12,7 +12,7 @@ struct GreetingHeader: View {
         HStack(alignment: .top) {
             VStack(alignment: .leading, spacing: 8) {
                 Text("\(greeting), Angus")
-                    .font(.title2)
+                    .font(.system(size: 24, weight: .bold))
                     .accessibilityIdentifier("greetingHeader.greetingText")
                 
                 Text("\(cityName) • \(condition)")

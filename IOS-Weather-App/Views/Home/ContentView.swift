@@ -8,7 +8,7 @@ struct ContentView: View {
 
     var body: some View {
         ZStack {
-            AppColors.background
+            Color(hex: "#3D3D3D")
                 .ignoresSafeArea()
 
             VStack(alignment: .leading) {
