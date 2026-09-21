@@ -27,6 +27,11 @@ struct ContentView: View {
                     }
                 )
 
+                Hero(
+                    temperature: "14°",
+                    condition: "Raining"
+                )
+
                 Text(lastAction)
                     .accessibilityIdentifier(actionIdentifier)
                     .padding()
