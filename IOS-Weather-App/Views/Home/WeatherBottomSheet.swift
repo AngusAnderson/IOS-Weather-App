@@ -11,25 +11,22 @@ struct WeatherBottomSheet: View {
     let windDirection: String
     let condition: String
 
-    @State private var isExpanded = false
-    @GestureState private var dragTranslation: CGFloat = 0
+    @State private var sheetOffset: CGFloat = 0
+    @State private var dragStartOffset: CGFloat = 0
+    @State private var sheetHeight: CGFloat = 0
+    @State private var isDragging: Bool = false
 
     private let sheetCornerRadius: CGFloat = 32
     private let secondaryTextOpacity: Double = 0.66
+    private let collapsedVisibleHeight: CGFloat = 94
+    private let fastSwipeThreshold: CGFloat = 120
 
     var body: some View {
-        GeometryReader { geometry in
-            let expandedHeight = geometry.size.height * 0.88
-            let collapsedHeight = geometry.size.height * 0.40
-            let sheetHeight = expandedHeight
-
-            let restingOffset = isExpanded
-                ? geometry.size.height - expandedHeight
-                : geometry.size.height - collapsedHeight
-
-            let currentOffset = max(
-                geometry.size.height - expandedHeight,
-                restingOffset + dragTranslation
+        GeometryReader { screenGeometry in
+            let expandedOffset: CGFloat = 0
+            let collapsedOffset = max(
+                0,
+                sheetHeight - collapsedVisibleHeight
             )
 
             VStack(spacing: 0) {
@@ -38,11 +35,7 @@ struct WeatherBottomSheet: View {
                 sheetContent
                     .frame(maxWidth: .infinity, alignment: .leading)
             }
-            .frame(
-                width: geometry.size.width - 24,
-                height: sheetHeight,
-                alignment: .top
-            )
+            .fixedSize(horizontal: false, vertical: true)
             .background(Color(red: 0.13, green: 0.13, blue: 0.13))
             .clipShape(
                 RoundedRectangle(
@@ -55,44 +48,94 @@ struct WeatherBottomSheet: View {
                     cornerRadius: sheetCornerRadius,
                     style: .continuous
                 )
-                .stroke(Color.white.opacity(0.08), lineWidth: 1)
+                .stroke(
+                    Color.white.opacity(0.08),
+                    lineWidth: 1
+                )
             }
             .shadow(
                 color: .black.opacity(0.35),
                 radius: 16,
                 y: 6
             )
+            .padding(.horizontal, 12)
+            .background {
+                GeometryReader { sheetGeometry in
+                    Color.clear
+                        .onAppear {
+                            let measuredHeight = sheetGeometry.size.height
+
+                            sheetHeight = measuredHeight
+
+                            sheetOffset = max(
+                                0,
+                                measuredHeight - collapsedVisibleHeight
+                            )
+                        }
+                        .onChange(of: sheetGeometry.size.height) {
+                            _, newHeight in
+
+                            sheetHeight = newHeight
+
+                            let maximumOffset = max(
+                                0,
+                                newHeight - collapsedVisibleHeight
+                            )
+
+                            sheetOffset = min(
+                                max(sheetOffset, expandedOffset),
+                                maximumOffset
+                            )
+                        }
+                }
+            }
             .offset(
-                x: 12,
-                y: currentOffset
-            )
-            .animation(
-                .interactiveSpring(
-                    response: 0.35,
-                    dampingFraction: 0.85
-                ),
-                value: isExpanded
+                y: screenGeometry.size.height
+                    - sheetHeight
+                    + sheetOffset
             )
             .gesture(
-                DragGesture()
-                    .updating($dragTranslation) { value, state, _ in
-                        state = value.translation.height
+                DragGesture(minimumDistance: 0)
+                    .onChanged { value in
+                        if !isDragging {
+                            isDragging = true
+                            dragStartOffset = sheetOffset
+                        }
+
+                        let proposedOffset = dragStartOffset
+                            + value.translation.height
+
+                        sheetOffset = min(
+                            max(proposedOffset, expandedOffset),
+                            collapsedOffset
+                        )
                     }
                     .onEnded { value in
-                        let verticalMovement = value.translation.height
+                        isDragging = false
+
+                        let velocityEffect = value.predictedEndTranslation.height
+                            - value.translation.height
+
+                        let targetOffset: CGFloat
+
+                        if velocityEffect < -fastSwipeThreshold {
+                            targetOffset = expandedOffset
+                        } else if velocityEffect > fastSwipeThreshold {
+                            targetOffset = collapsedOffset
+                        } else {
+                            targetOffset = sheetOffset
+                        }
 
                         withAnimation(
                             .interactiveSpring(
                                 response: 0.35,
-                                dampingFraction: 0.85
+                                dampingFraction: 0.86
                             )
                         ) {
-                            if verticalMovement < -80 {
-                                isExpanded = true
-                            } else if verticalMovement > 80 {
-                                isExpanded = false
-                            }
+                            sheetOffset = targetOffset
                         }
+
+                        dragStartOffset = targetOffset
                     }
             )
         }
@@ -103,8 +146,8 @@ struct WeatherBottomSheet: View {
         Capsule()
             .fill(Color.white.opacity(0.95))
             .frame(width: 110, height: 4)
-            .padding(.top, 8)
-            .padding(.bottom, 38)
+            .padding(.top, 16)
+            .padding(.bottom, 20)
     }
 
     private var sheetContent: some View {
@@ -220,7 +263,11 @@ struct WeatherBottomSheet: View {
                 .foregroundStyle(.white)
 
             Circle()
-                .fill(isBlue ? Color.blue : Color.gray.opacity(0.75))
+                .fill(
+                    isBlue
+                        ? Color(hex: "#1C99FF")
+                        : Color.gray.opacity(0.75)
+                )
                 .frame(width: 25, height: 25)
         }
         .frame(maxWidth: .infinity)
