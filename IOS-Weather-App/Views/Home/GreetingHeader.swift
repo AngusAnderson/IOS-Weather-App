@@ -12,11 +12,11 @@ struct GreetingHeader: View {
         HStack(alignment: .top) {
             VStack(alignment: .leading, spacing: 8) {
                 Text("\(greeting), Angus")
-                    .font(.system(size: 24, weight: .bold))
+                    .font(Font.custom("RobotoMono-Regular", size: 20))
                     .accessibilityIdentifier("greetingHeader.greetingText")
                 
                 Text("\(cityName) • \(condition)")
-                    .font(.headline)
+                    .font(Font.custom("RobotoMono-Regular", size: 16))
                     .accessibilityIdentifier("greetingHeader.LocationConditionText")
             }
 
