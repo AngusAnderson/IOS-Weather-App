@@ -12,10 +12,17 @@ struct WeatherSearchOverlay: View {
                 searchField
 
                 resultsList
+                    .frame(
+                        maxWidth: .infinity,
+                        maxHeight: .infinity,
+                        alignment: .top
+                    )
             }
             .frame(
                 maxWidth: 620,
-                maxHeight: 430
+                minHeight: 430,
+                maxHeight: 430,
+                alignment: .top
             )
             .background(
                 Color(
@@ -131,20 +138,49 @@ struct WeatherSearchOverlay: View {
     @ViewBuilder
     private var resultsList: some View {
         if viewModel.isSearching {
-            ProgressView()
-                .tint(.white)
-                .frame(maxWidth: .infinity)
-                .padding(.vertical, 28)
+            HStack(spacing: 10) {
+                ProgressView()
+                    .tint(.white)
+
+                Text("Searching locations...")
+                    .font(.system(size: 15))
+                    .foregroundStyle(
+                        Color.white.opacity(0.60)
+                    )
+            }
+            .padding(.horizontal, 20)
+            .padding(.vertical, 18)
+            .frame(
+                maxWidth: .infinity,
+                alignment: .leading
+            )
 
         } else if viewModel.searchText.count >= 2 &&
                     viewModel.searchResults.isEmpty {
             Text("No locations found")
-                .font(.system(size: 16))
+                .font(.system(size: 15))
                 .foregroundStyle(
                     Color.white.opacity(0.55)
                 )
-                .frame(maxWidth: .infinity)
-                .padding(.vertical, 28)
+                .padding(.horizontal, 20)
+                .padding(.vertical, 18)
+                .frame(
+                    maxWidth: .infinity,
+                    alignment: .leading
+                )
+
+        } else if viewModel.searchText.count < 2 {
+            Text("Search for a city")
+                .font(.system(size: 15))
+                .foregroundStyle(
+                    Color.white.opacity(0.55)
+                )
+                .padding(.horizontal, 20)
+                .padding(.vertical, 18)
+                .frame(
+                    maxWidth: .infinity,
+                    alignment: .leading
+                )
 
         } else {
             ScrollView {
