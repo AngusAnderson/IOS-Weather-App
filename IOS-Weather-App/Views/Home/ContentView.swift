@@ -25,7 +25,10 @@ struct ContentView: View {
                     onHelpTapped: {
                         lastAction = "help tapped"
                     }
+                    
                 )
+                .offset(y: -60)
+                .ignoresSafeArea(.container, edges: .top)
 
                 Hero(
                     temperature: "14°",
@@ -36,6 +39,7 @@ struct ContentView: View {
                     .accessibilityIdentifier(actionIdentifier)
                     .padding()
             }
+            
         }
     }
 

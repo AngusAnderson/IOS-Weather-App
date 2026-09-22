@@ -59,6 +59,7 @@ struct GreetingHeader: View {
                 .clipShape(Capsule())
             }
         }
-        .padding()
+        .padding(.horizontal, 16)
+        .padding(.top, 8)
     }
 }
