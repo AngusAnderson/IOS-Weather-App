@@ -34,6 +34,7 @@ struct ContentView: View {
                     temperature: "14°",
                     condition: "Raining"
                 )
+                .offset(y: -80)
 
                 Text(lastAction)
                     .accessibilityIdentifier(actionIdentifier)

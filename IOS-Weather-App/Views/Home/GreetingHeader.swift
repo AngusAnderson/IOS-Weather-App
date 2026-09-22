@@ -13,15 +13,16 @@ struct GreetingHeader: View {
         HStack(alignment: .top) {
             VStack(alignment: .leading, spacing: 8) {
                 Text("\(greeting), Angus")
-                    .font(Font.custom("RobotoMono-Regular", size: 20))
+                    .font(Font.custom("RobotoMono-Regular", size: 22))
                     .tracking(20 * 0.04)
                     .accessibilityIdentifier("greetingHeader.greetingText")
                 
                 Text("\(cityName) • \(condition)")
-                    .font(Font.custom("RobotoMono-Regular", size: 16))
+                    .font(Font.custom("RobotoMono-Regular", size: 18))
                     .tracking(16 * 0.04)
                     .accessibilityIdentifier("greetingHeader.LocationConditionText")
             }
+            .padding()
 
             Spacer()
 
