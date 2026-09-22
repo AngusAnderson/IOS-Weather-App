@@ -34,12 +34,24 @@ struct ContentView: View {
                     temperature: "14°",
                     condition: "Raining"
                 )
-                .offset(y: -80)
+                .offset(y: -100)
 
                 Text(lastAction)
                     .accessibilityIdentifier(actionIdentifier)
                     .padding()
             }
+
+            WeatherBottomSheet(
+                cityName: "Glasgow",
+                sunrise: "06:18 am",
+                sunset: "08:39 pm",
+                feelsLike: "12°",
+                humidity: "88%",
+                uvIndex: "2",
+                windSpeed: "7 m/s",
+                windDirection: "SW",
+                condition: "Raining"
+            )
             
         }
     }
