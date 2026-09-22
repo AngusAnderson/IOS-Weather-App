@@ -8,7 +8,7 @@ struct ContentView: View {
 
     var body: some View {
         ZStack {
-            AppColors.background
+            Color(hex: "#3D3D3D")
                 .ignoresSafeArea()
 
             VStack(alignment: .leading) {
@@ -19,23 +19,28 @@ struct ContentView: View {
                     onSearchTapped: {
                         lastAction = "search tapped"
                     },
-                    onHelpTapped: {
-                        lastAction = "help tapped"
-                    },
                     onRefreshTapped: {
                         lastAction = "refresh tapped"
+                    },
+                    onHelpTapped: {
+                        lastAction = "help tapped"
                     }
+                    
                 )
+                .offset(y: -60)
+                .ignoresSafeArea(.container, edges: .top)
 
                 Hero(
                     temperature: "14°",
                     condition: "Raining"
                 )
+                .offset(y: -80)
 
                 Text(lastAction)
                     .accessibilityIdentifier(actionIdentifier)
                     .padding()
             }
+            
         }
     }
 

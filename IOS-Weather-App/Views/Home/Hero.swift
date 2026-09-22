@@ -13,7 +13,7 @@ struct Hero: View {
                 .font(.system(size: 128, weight: .heavy))
                 .foregroundStyle(Color(hex: "#FFFEFA"))
         }
-        .frame(width: 350, height: 350)
+        .frame(width: 360, height: 360)
         .padding()
     }
 }
