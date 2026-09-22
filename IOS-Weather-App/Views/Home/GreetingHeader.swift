@@ -4,42 +4,59 @@ struct GreetingHeader: View {
     let cityName: String
     let condition: String
     let greeting: String
+
     let onSearchTapped: () -> Void
-    let onHelpTapped: () -> Void
     let onRefreshTapped: () -> Void
+    let onHelpTapped: () -> Void
 
     var body: some View {
         HStack(alignment: .top) {
             VStack(alignment: .leading, spacing: 8) {
                 Text("\(greeting), Angus")
                     .font(Font.custom("RobotoMono-Regular", size: 20))
+                    .tracking(20 * 0.04)
                     .accessibilityIdentifier("greetingHeader.greetingText")
                 
                 Text("\(cityName) • \(condition)")
                     .font(Font.custom("RobotoMono-Regular", size: 16))
+                    .tracking(16 * 0.04)
                     .accessibilityIdentifier("greetingHeader.LocationConditionText")
             }
 
             Spacer()
 
-            VStack(spacing: 12) {
+            VStack(spacing: 14) {
                 Button(action: onSearchTapped) {
                     Image(systemName: "magnifyingglass")
                 }
                 .accessibilityLabel("Search for a city")
                 .accessibilityIdentifier("greetingHeader.searchButton")
+                .buttonStyle(SearchButtonStyle())
 
-                Button(action: onRefreshTapped) {
-                    Image(systemName: "arrow.clockwise")
-                }
-                .accessibilityLabel("Refresh weather")
-                .accessibilityIdentifier("greetingHeader.refreshButton")
+                VStack(spacing: 0) {
+                    Button(action: onRefreshTapped) {
+                        Image(systemName: "arrow.clockwise")
+                    }
+                    .accessibilityLabel("Refresh weather")
+                    .accessibilityIdentifier("greetingHeader.refreshButton")
+                    .buttonStyle(ControlButtonStyle())
 
-                Button(action: onHelpTapped) {
-                    Image(systemName: "questionmark")
+                    Button(action: onHelpTapped) {
+                        Image(systemName: "questionmark")
+                    }
+                    .accessibilityLabel("Weather colour key")
+                    .accessibilityIdentifier("greetingHeader.helpButton")
+                    .buttonStyle(ControlButtonStyle())
                 }
-                .accessibilityLabel("Weather colour key")
-                .accessibilityIdentifier("greetingHeader.helpButton")
+                .background(
+                    Capsule()
+                        .fill(Color.white.opacity(0.2))
+                        .overlay(
+                            Capsule()
+                                .stroke(Color.white.opacity(0.75), lineWidth: 1)
+                        )
+                )
+                .clipShape(Capsule())
             }
         }
         .padding()

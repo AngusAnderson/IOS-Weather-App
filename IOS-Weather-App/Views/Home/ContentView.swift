@@ -19,11 +19,11 @@ struct ContentView: View {
                     onSearchTapped: {
                         lastAction = "search tapped"
                     },
-                    onHelpTapped: {
-                        lastAction = "help tapped"
-                    },
                     onRefreshTapped: {
                         lastAction = "refresh tapped"
+                    },
+                    onHelpTapped: {
+                        lastAction = "help tapped"
                     }
                 )
 
