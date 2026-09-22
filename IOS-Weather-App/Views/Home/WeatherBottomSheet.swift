@@ -36,7 +36,7 @@ struct WeatherBottomSheet: View {
                     .frame(maxWidth: .infinity, alignment: .leading)
             }
             .fixedSize(horizontal: false, vertical: true)
-            .background(Color(red: 0.13, green: 0.13, blue: 0.13))
+            .background(Color(hex: "#2B2B2B"))
             .clipShape(
                 RoundedRectangle(
                     cornerRadius: sheetCornerRadius,
@@ -63,14 +63,10 @@ struct WeatherBottomSheet: View {
                 GeometryReader { sheetGeometry in
                     Color.clear
                         .onAppear {
-                            let measuredHeight = sheetGeometry.size.height
 
-                            sheetHeight = measuredHeight
+                            sheetHeight = sheetGeometry.size.height
 
-                            sheetOffset = max(
-                                0,
-                                measuredHeight - collapsedVisibleHeight
-                            )
+                            sheetOffset = 0
                         }
                         .onChange(of: sheetGeometry.size.height) {
                             _, newHeight in
@@ -174,7 +170,7 @@ struct WeatherBottomSheet: View {
                 .fill(Color(hex: "#1C99FF"))
                 .frame(width: 30, height: 30)
         }
-        .padding(.bottom, 52)
+        .padding(.bottom, 35)
     }
 
     private var weatherMetrics: some View {
@@ -224,13 +220,13 @@ struct WeatherBottomSheet: View {
     ) -> some View {
         VStack(alignment: .leading, spacing: 4) {
             Text(title)
-                .font(.system(size: 16, weight: .light))
+                .font(.system(size: 13, weight: .light))
                 .foregroundStyle(
                     Color.white.opacity(secondaryTextOpacity)
                 )
 
             Text(value)
-                .font(.system(size: 20, weight: .regular))
+                .font(.system(size: 17, weight: .regular))
                 .foregroundStyle(.white)
         }
     }
@@ -253,13 +249,13 @@ struct WeatherBottomSheet: View {
     ) -> some View {
         VStack(spacing: 16) {
             Text(time)
-                .font(.system(size: 16, weight: .light))
+                .font(.system(size: 13, weight: .light))
                 .foregroundStyle(
                     Color.white.opacity(secondaryTextOpacity)
                 )
 
             Text(temperature)
-                .font(.system(size: 20, weight: .regular))
+                .font(.system(size: 17, weight: .regular))
                 .foregroundStyle(.white)
 
             Circle()
@@ -268,7 +264,7 @@ struct WeatherBottomSheet: View {
                         ? Color(hex: "#1C99FF")
                         : Color.gray.opacity(0.75)
                 )
-                .frame(width: 25, height: 25)
+                .frame(width: 23, height: 23)
         }
         .frame(maxWidth: .infinity)
     }
