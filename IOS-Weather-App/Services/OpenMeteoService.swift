@@ -161,7 +161,6 @@ struct OpenMeteoService {
             String($0.prefix(13)) >= currentHour
         } ?? 0
 
-        // Start after the current hour, so 11pm becomes 12am.
         let startIndex = min(
             currentIndex + 1,
             hourly.time.count

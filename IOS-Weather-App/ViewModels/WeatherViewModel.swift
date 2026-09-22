@@ -10,6 +10,10 @@ final class WeatherViewModel {
     var isLoading = false
     var errorMessage: String?
 
+    var searchText = ""
+    var searchResults: [LocationSearchResult] = []
+    var isSearching = false
+
     func loadWeather(
         for location: LocationSearchResult
     ) async {
@@ -39,5 +43,42 @@ final class WeatherViewModel {
         )
 
         await loadWeather(for: glasgow)
+    }
+
+    func searchLocations() async {
+        let query = searchText.trimmingCharacters(
+            in: .whitespacesAndNewlines
+        )
+
+        guard query.count >= 2 else {
+            searchResults = []
+            return
+        }
+
+        isSearching = true
+
+        do {
+            searchResults = try await weatherService.searchLocations(
+                named: query
+            )
+        } catch {
+            searchResults = []
+        }
+
+        isSearching = false
+    }
+
+    func selectLocation(
+        _ location: LocationSearchResult
+    ) async {
+        searchText = location.name
+        searchResults = []
+
+        await loadWeather(for: location)
+    }
+
+    func clearSearch() {
+        searchText = ""
+        searchResults = []
     }
 }
