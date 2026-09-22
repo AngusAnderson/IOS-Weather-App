@@ -77,7 +77,8 @@ struct ContentView: View {
                 uvIndex: weather.uvIndex,
                 windSpeed: weather.windSpeed,
                 windDirection: weather.windDirection,
-                condition: weather.condition
+                condition: weather.condition,
+                hourlyForecastItems: weather.hourlyForecast
             )
 
             if viewModel.isLoading {

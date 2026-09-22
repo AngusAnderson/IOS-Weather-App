@@ -21,5 +21,4 @@ struct HourlyForecastItem: Identifiable {
     let id = UUID()
     let time: String
     let temperature: String
-    let weatherCode: Int
 }

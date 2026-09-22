@@ -91,7 +91,7 @@ struct OpenMeteoService {
                 value: "sunrise,sunset,uv_index_max"
             ),
             URLQueryItem(name: "timezone", value: "auto"),
-            URLQueryItem(name: "forecast_days", value: "1")
+            URLQueryItem(name: "forecast_days", value: "2")
         ]
 
         guard let url = components?.url else {
@@ -155,24 +155,43 @@ struct OpenMeteoService {
         from hourly: HourlyWeather,
         currentTime: String
     ) -> [HourlyForecastItem] {
-        guard let currentIndex = hourly.time.firstIndex(
-            where: { $0 == currentTime }
-        ) else {
-            return []
-        }
+        let currentHour = String(currentTime.prefix(13))
 
-        let endIndex = min(
-            currentIndex + 6,
+        let currentIndex = hourly.time.firstIndex {
+            String($0.prefix(13)) >= currentHour
+        } ?? 0
+
+        // Start after the current hour, so 11pm becomes 12am.
+        let startIndex = min(
+            currentIndex + 1,
             hourly.time.count
         )
 
-        return (currentIndex..<endIndex).map { index in
+        let endIndex = min(
+            startIndex + 6,
+            hourly.time.count
+        )
+
+        guard startIndex < endIndex else {
+            return []
+        }
+
+        return hourly.time[startIndex..<endIndex].indices.map { index in
             HourlyForecastItem(
-                time: formattedHour(from: hourly.time[index]),
-                temperature: "\(Int(hourly.temperature2m[index].rounded()))°",
-                weatherCode: hourly.weatherCode[index]
+                time: formattedHour(
+                    from: hourly.time[index]
+                ),
+                temperature: formattedTemperature(
+                    hourly.temperature2m[index]
+                )
             )
         }
+    }
+
+    private func formattedTemperature(
+        _ temperature: Double
+    ) -> String {
+        "\(Int(temperature.rounded()))°"
     }
 
     private func formattedTime(

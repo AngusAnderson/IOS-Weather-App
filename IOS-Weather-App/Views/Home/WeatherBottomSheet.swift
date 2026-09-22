@@ -10,6 +10,7 @@ struct WeatherBottomSheet: View {
     let windSpeed: String
     let windDirection: String
     let condition: String
+    let hourlyForecastItems: [HourlyForecastItem]
 
     @State private var sheetOffset: CGFloat = 0
     @State private var dragStartOffset: CGFloat = 0
@@ -233,19 +234,18 @@ struct WeatherBottomSheet: View {
 
     private var hourlyForecast: some View {
         HStack(spacing: 0) {
-            hourlyWeather(time: "10pm", temperature: "14°", isBlue: true)
-            hourlyWeather(time: "11pm", temperature: "13°", isBlue: true)
-            hourlyWeather(time: "12am", temperature: "13°", isBlue: true)
-            hourlyWeather(time: "01am", temperature: "11°", isBlue: false)
-            hourlyWeather(time: "02am", temperature: "10°", isBlue: false)
-            hourlyWeather(time: "03am", temperature: "09°", isBlue: false)
+            ForEach(hourlyForecastItems) { hourlyItem in
+                hourlyWeather(
+                    time: hourlyItem.time,
+                    temperature: hourlyItem.temperature
+                )
+            }
         }
     }
 
     private func hourlyWeather(
         time: String,
-        temperature: String,
-        isBlue: Bool
+        temperature: String
     ) -> some View {
         VStack(spacing: 16) {
             Text(time)
@@ -259,11 +259,7 @@ struct WeatherBottomSheet: View {
                 .foregroundStyle(.white)
 
             Circle()
-                .fill(
-                    isBlue
-                        ? Color(hex: "#1C99FF")
-                        : Color.gray.opacity(0.75)
-                )
+                .fill(Color(hex: "#1C99FF"))
                 .frame(width: 23, height: 23)
         }
         .frame(maxWidth: .infinity)
