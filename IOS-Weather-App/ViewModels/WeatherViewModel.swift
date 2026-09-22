@@ -5,6 +5,7 @@ import Observation
 @MainActor
 final class WeatherViewModel {
     private let weatherService = OpenMeteoService()
+    private let lastLocationKey = "lastSelectedWeatherLocation"
 
     var weather: WeatherViewData?
     var isLoading = false
@@ -74,11 +75,59 @@ final class WeatherViewModel {
         searchText = location.name
         searchResults = []
 
+        saveLocation(location)
+
         await loadWeather(for: location)
     }
 
     func clearSearch() {
         searchText = ""
         searchResults = []
+    }
+
+    func loadSavedOrDefaultLocation() async {
+        if let savedLocation = loadSavedLocation() {
+            await loadWeather(for: savedLocation)
+        } else {
+            await loadGlasgowWeather()
+        }
+    }
+
+    private func saveLocation(
+        _ location: LocationSearchResult
+    ) {
+        do {
+            let data = try JSONEncoder().encode(location)
+
+            UserDefaults.standard.set(
+                data,
+                forKey: lastLocationKey
+            )
+        } catch {
+            print("Could not save selected location:", error)
+        }
+    }
+
+    private func loadSavedLocation() -> LocationSearchResult? {
+        guard let data = UserDefaults.standard.data(
+            forKey: lastLocationKey
+        ) else {
+            return nil
+        }
+
+        do {
+            return try JSONDecoder().decode(
+                LocationSearchResult.self,
+                from: data
+            )
+        } catch {
+            print("Could not load saved location:", error)
+
+            UserDefaults.standard.removeObject(
+                forKey: lastLocationKey
+            )
+
+            return nil
+        }
     }
 }

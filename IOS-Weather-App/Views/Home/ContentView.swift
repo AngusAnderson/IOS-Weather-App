@@ -73,7 +73,7 @@ struct ContentView: View {
             value: showingSearch
         )
         .task {
-            await viewModel.loadGlasgowWeather()
+            await viewModel.loadSavedOrDefaultLocation()
         }
     }
 
@@ -94,7 +94,7 @@ struct ContentView: View {
                     },
                     onRefreshTapped: {
                         Task {
-                            await viewModel.loadGlasgowWeather()
+                            await viewModel.loadSavedOrDefaultLocation()
                         }
                     },
                     onHelpTapped: {}
