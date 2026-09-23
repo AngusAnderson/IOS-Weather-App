@@ -3,18 +3,26 @@ import Foundation
 enum WeatherServiceError: LocalizedError {
     case invalidURL
     case invalidResponse
+    case unavailable
+    case decodingFailed
     case locationNotFound
 
     var errorDescription: String? {
         switch self {
-        case .invalidURL:
-            return "The weather request could not be created."
+            case .invalidURL:
+                return "The weather request could not be created."
 
-        case .invalidResponse:
-            return "The weather service returned an invalid response."
+            case .invalidResponse:
+                return "Weather data is temporarily unavailable."
 
-        case .locationNotFound:
-            return "No matching location was found."
+            case .unavailable:
+                return "Check your internet connection and try again."
+
+            case .decodingFailed:
+                return "Weather data could not be read. Please try again."
+
+            case .locationNotFound:
+                return "No matching location was found."
         }
     }
 }
@@ -53,19 +61,29 @@ struct OpenMeteoService {
             throw WeatherServiceError.invalidURL
         }
 
-        let (data, response) = try await session.data(from: url)
+        do {
+            let (data, response) = try await session.data(from: url)
 
-        guard let httpResponse = response as? HTTPURLResponse,
-              200..<300 ~= httpResponse.statusCode else {
-            throw WeatherServiceError.invalidResponse
+            guard let httpResponse = response as? HTTPURLResponse,
+                200..<300 ~= httpResponse.statusCode else {
+                throw WeatherServiceError.invalidResponse
+            }
+
+            do {
+                let decodedResponse = try JSONDecoder().decode(
+                    GeocodingResponse.self,
+                    from: data
+                )
+
+                return decodedResponse.results ?? []
+            } catch is DecodingError {
+                throw WeatherServiceError.decodingFailed
+            }
+        } catch let error as WeatherServiceError {
+            throw error
+        } catch {
+            throw WeatherServiceError.unavailable
         }
-
-        let decodedResponse = try JSONDecoder().decode(
-            GeocodingResponse.self,
-            from: data
-        )
-
-        return decodedResponse.results ?? []
     }
 
     func fetchWeather(
@@ -107,22 +125,32 @@ struct OpenMeteoService {
             throw WeatherServiceError.invalidURL
         }
 
-        let (data, response) = try await session.data(from: url)
+        do {
+            let (data, response) = try await session.data(from: url)
 
-        guard let httpResponse = response as? HTTPURLResponse,
-              200..<300 ~= httpResponse.statusCode else {
-            throw WeatherServiceError.invalidResponse
+            guard let httpResponse = response as? HTTPURLResponse,
+                200..<300 ~= httpResponse.statusCode else {
+                throw WeatherServiceError.invalidResponse
+            }
+
+            do {
+                let forecast = try JSONDecoder().decode(
+                    OpenMeteoForecastResponse.self,
+                    from: data
+                )
+
+                return mapForecast(
+                    forecast,
+                    cityName: location.name
+                )
+            } catch is DecodingError {
+                throw WeatherServiceError.decodingFailed
+            }
+        } catch let error as WeatherServiceError {
+            throw error
+        } catch {
+            throw WeatherServiceError.unavailable
         }
-
-        let forecast = try JSONDecoder().decode(
-            OpenMeteoForecastResponse.self,
-            from: data
-        )
-
-        return mapForecast(
-            forecast,
-            cityName: location.name
-        )
     }
 
     private func mapForecast(
