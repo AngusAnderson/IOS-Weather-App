@@ -124,7 +124,7 @@ struct HelpSettingsView: View {
                 Made by Angus the Anderson
                 API by Open-Meteo
 
-                Nothing is stored on Servers, only on your phone
+                Nothing is stored on Servers, only your phone
                 """)
             .font(.system(size: 12))
             .foregroundStyle(Color.white.opacity(0.66))
