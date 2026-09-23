@@ -119,7 +119,7 @@ struct WeatherSearchOverlay: View {
             Button {
                 onDismiss()
             } label: {
-                Image(systemName: "escape")
+                Image(systemName: "xmark")
                     .font(.system(size: 18, weight: .medium))
                     .foregroundStyle(
                         Color.white.opacity(0.55)
