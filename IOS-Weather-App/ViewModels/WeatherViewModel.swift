@@ -51,18 +51,31 @@ final class WeatherViewModel {
             in: .whitespacesAndNewlines
         )
 
-        guard query.count >= 2 else {
+        guard query.count >= 2, query.count <= 100 else {
             searchResults = []
+            isSearching = false
             return
         }
 
         isSearching = true
 
         do {
-            searchResults = try await weatherService.searchLocations(
+            let locations = try await weatherService.searchLocations(
                 named: query
             )
+
+            guard !Task.isCancelled else {
+                return
+            }
+
+            searchResults = locations
+        } catch is CancellationError {
+            return
         } catch {
+            guard !Task.isCancelled else {
+                return
+            }
+
             searchResults = []
         }
 
@@ -96,16 +109,17 @@ final class WeatherViewModel {
     private func saveLocation(
         _ location: LocationSearchResult
     ) {
-        do {
-            let data = try JSONEncoder().encode(location)
-
-            UserDefaults.standard.set(
-                data,
-                forKey: lastLocationKey
+        guard let data = try? JSONEncoder().encode(location) else {
+            assertionFailure(
+                "Failed to encode selected weather location."
             )
-        } catch {
-            print("Could not save selected location:", error)
+            return
         }
+
+        UserDefaults.standard.set(
+            data,
+            forKey: lastLocationKey
+        )
     }
 
     private func loadSavedLocation() -> LocationSearchResult? {
@@ -115,19 +129,21 @@ final class WeatherViewModel {
             return nil
         }
 
-        do {
-            return try JSONDecoder().decode(
-                LocationSearchResult.self,
-                from: data
-            )
-        } catch {
-            print("Could not load saved location:", error)
-
+        guard let location = try? JSONDecoder().decode(
+            LocationSearchResult.self,
+            from: data
+        ) else {
             UserDefaults.standard.removeObject(
                 forKey: lastLocationKey
             )
 
+            assertionFailure(
+                "Failed to decode saved weather location."
+            )
+
             return nil
         }
+
+        return location
     }
 }

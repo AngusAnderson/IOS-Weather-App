@@ -3,18 +3,26 @@ import Foundation
 enum WeatherServiceError: LocalizedError {
     case invalidURL
     case invalidResponse
+    case unavailable
+    case decodingFailed
     case locationNotFound
 
     var errorDescription: String? {
         switch self {
-        case .invalidURL:
-            return "The weather request could not be created."
+            case .invalidURL:
+                return "The weather request could not be created."
 
-        case .invalidResponse:
-            return "The weather service returned an invalid response."
+            case .invalidResponse:
+                return "Weather data is temporarily unavailable."
 
-        case .locationNotFound:
-            return "No matching location was found."
+            case .unavailable:
+                return "Check your internet connection and try again."
+
+            case .decodingFailed:
+                return "Weather data could not be read. Please try again."
+
+            case .locationNotFound:
+                return "No matching location was found."
         }
     }
 }
@@ -22,8 +30,17 @@ enum WeatherServiceError: LocalizedError {
 struct OpenMeteoService {
     private let session: URLSession
 
-    init(session: URLSession = .shared) {
+    init(session: URLSession = OpenMeteoService.makeSession()) {
         self.session = session
+    }
+
+    private static func makeSession() -> URLSession {
+        let configuration = URLSessionConfiguration.ephemeral
+        configuration.timeoutIntervalForRequest = 15
+        configuration.timeoutIntervalForResource = 30
+        configuration.waitsForConnectivity = true
+
+        return URLSession(configuration: configuration)
     }
 
     func searchLocations(
@@ -44,19 +61,29 @@ struct OpenMeteoService {
             throw WeatherServiceError.invalidURL
         }
 
-        let (data, response) = try await session.data(from: url)
+        do {
+            let (data, response) = try await session.data(from: url)
 
-        guard let httpResponse = response as? HTTPURLResponse,
-              200..<300 ~= httpResponse.statusCode else {
-            throw WeatherServiceError.invalidResponse
+            guard let httpResponse = response as? HTTPURLResponse,
+                200..<300 ~= httpResponse.statusCode else {
+                throw WeatherServiceError.invalidResponse
+            }
+
+            do {
+                let decodedResponse = try JSONDecoder().decode(
+                    GeocodingResponse.self,
+                    from: data
+                )
+
+                return decodedResponse.results ?? []
+            } catch is DecodingError {
+                throw WeatherServiceError.decodingFailed
+            }
+        } catch let error as WeatherServiceError {
+            throw error
+        } catch {
+            throw WeatherServiceError.unavailable
         }
-
-        let decodedResponse = try JSONDecoder().decode(
-            GeocodingResponse.self,
-            from: data
-        )
-
-        return decodedResponse.results ?? []
     }
 
     func fetchWeather(
@@ -98,22 +125,32 @@ struct OpenMeteoService {
             throw WeatherServiceError.invalidURL
         }
 
-        let (data, response) = try await session.data(from: url)
+        do {
+            let (data, response) = try await session.data(from: url)
 
-        guard let httpResponse = response as? HTTPURLResponse,
-              200..<300 ~= httpResponse.statusCode else {
-            throw WeatherServiceError.invalidResponse
+            guard let httpResponse = response as? HTTPURLResponse,
+                200..<300 ~= httpResponse.statusCode else {
+                throw WeatherServiceError.invalidResponse
+            }
+
+            do {
+                let forecast = try JSONDecoder().decode(
+                    OpenMeteoForecastResponse.self,
+                    from: data
+                )
+
+                return mapForecast(
+                    forecast,
+                    cityName: location.name
+                )
+            } catch is DecodingError {
+                throw WeatherServiceError.decodingFailed
+            }
+        } catch let error as WeatherServiceError {
+            throw error
+        } catch {
+            throw WeatherServiceError.unavailable
         }
-
-        let forecast = try JSONDecoder().decode(
-            OpenMeteoForecastResponse.self,
-            from: data
-        )
-
-        return mapForecast(
-            forecast,
-            cityName: location.name
-        )
     }
 
     private func mapForecast(
@@ -155,27 +192,37 @@ struct OpenMeteoService {
         from hourly: HourlyWeather,
         currentTime: String
     ) -> [HourlyForecastItem] {
+        let safeCount = min(
+            hourly.time.count,
+            hourly.temperature2m.count,
+            hourly.weatherCode.count
+        )
+
+        guard safeCount > 0 else {
+            return []
+        }
+
         let currentHour = String(currentTime.prefix(13))
 
-        let currentIndex = hourly.time.firstIndex {
+        let currentIndex = hourly.time.prefix(safeCount).firstIndex {
             String($0.prefix(13)) >= currentHour
         } ?? 0
 
         let startIndex = min(
             currentIndex + 1,
-            hourly.time.count
+            safeCount
         )
 
         let endIndex = min(
             startIndex + 6,
-            hourly.time.count
+            safeCount
         )
 
         guard startIndex < endIndex else {
             return []
         }
 
-        return hourly.time[startIndex..<endIndex].indices.map { index in
+        return (startIndex..<endIndex).map { index in
             HourlyForecastItem(
                 time: formattedHour(
                     from: hourly.time[index]
