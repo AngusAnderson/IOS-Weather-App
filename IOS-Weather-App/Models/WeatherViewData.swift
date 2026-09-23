@@ -1,6 +1,6 @@
 import Foundation
 
-struct WeatherViewData {
+struct WeatherViewData: Codable {
     let cityName: String
     let temperature: String
     let condition: String
@@ -17,7 +17,7 @@ struct WeatherViewData {
     let hourlyForecast: [HourlyForecastItem]
 }
 
-struct HourlyForecastItem: Identifiable {
+struct HourlyForecastItem: Identifiable, Codable {
     let id = UUID()
     let time: String
     let temperature: String
