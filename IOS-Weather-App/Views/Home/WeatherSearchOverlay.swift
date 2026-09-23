@@ -59,16 +59,28 @@ struct WeatherSearchOverlay: View {
             searchFieldFocused = true
         }
         .task(id: viewModel.searchText) {
-            guard viewModel.searchText.count >= 2 else {
+            let trimmedQuery = viewModel.searchText.trimmingCharacters(
+                in: .whitespacesAndNewlines
+            )
+
+            guard trimmedQuery.count >= 2,
+                trimmedQuery.count <= 100 else {
                 viewModel.searchResults = []
+                viewModel.isSearching = false
                 return
             }
 
             // Prevents a network request happening on every bloody keystroke.
             // Found out the hard way on that one :(.
-            try? await Task.sleep(
-                for: .milliseconds(300)
-            )
+            do {
+                try await Task.sleep(
+                    nanoseconds: 300_000_000
+                )
+            } catch is CancellationError {
+                return
+            } catch {
+                return
+            }
 
             guard !Task.isCancelled else {
                 return

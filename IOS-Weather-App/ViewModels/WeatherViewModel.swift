@@ -51,18 +51,31 @@ final class WeatherViewModel {
             in: .whitespacesAndNewlines
         )
 
-        guard query.count >= 2 else {
+        guard query.count >= 2, query.count <= 100 else {
             searchResults = []
+            isSearching = false
             return
         }
 
         isSearching = true
 
         do {
-            searchResults = try await weatherService.searchLocations(
+            let locations = try await weatherService.searchLocations(
                 named: query
             )
+
+            guard !Task.isCancelled else {
+                return
+            }
+
+            searchResults = locations
+        } catch is CancellationError {
+            return
         } catch {
+            guard !Task.isCancelled else {
+                return
+            }
+
             searchResults = []
         }
 
