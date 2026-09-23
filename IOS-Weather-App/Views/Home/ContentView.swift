@@ -120,7 +120,8 @@ struct ContentView: View {
 
                 Hero(
                     temperature: weather.temperature,
-                    condition: weather.condition
+                    condition: weather.condition,
+                    weatherCode: weather.weatherCode
                 )
                 .offset(y: -25)
 
@@ -137,6 +138,7 @@ struct ContentView: View {
                 windSpeed: weather.windSpeed,
                 windDirection: weather.windDirection,
                 condition: weather.condition,
+                weatherCode: weather.weatherCode,
                 hourlyForecastItems: weather.hourlyForecast
             )
 
