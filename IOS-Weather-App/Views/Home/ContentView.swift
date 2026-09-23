@@ -3,6 +3,11 @@ import SwiftUI
 struct ContentView: View {
     @State private var viewModel = WeatherViewModel()
     @State private var showingSearch = false
+    @State private var showingNameSetup = false
+
+    @AppStorage("userFirstName") private var userFirstName = ""
+    @AppStorage("hasCompletedNameSetup")
+    private var hasCompletedNameSetup = false
 
     var body: some View {
         GeometryReader { screenGeometry in
@@ -32,26 +37,12 @@ struct ContentView: View {
                 }
 
                 if showingSearch {
-                    Color.black
-                        .opacity(0.18)
-                        .background(.ultraThinMaterial)
-                        .ignoresSafeArea()
-                        .transition(.opacity)
-                        .zIndex(9)
-                        .onTapGesture {
-                            withAnimation(.easeOut(duration: 0.22)) {
-                                showingSearch = false
-                                viewModel.clearSearch()
-                            }
-                        }
+                    searchBackdrop
 
                     WeatherSearchOverlay(
                         viewModel: viewModel,
                         onDismiss: {
-                            withAnimation(.easeOut(duration: 0.22)) {
-                                showingSearch = false
-                                viewModel.clearSearch()
-                            }
+                            closeSearch()
                         }
                     )
                     .transition(
@@ -61,6 +52,23 @@ struct ContentView: View {
                     )
                     .zIndex(10)
                 }
+
+                if showingNameSetup {
+                    NameSetupView(
+                        onContinue: { name in
+                            saveNameAndDismissSetup(name)
+                        },
+                        onSkip: {
+                            saveNameAndDismissSetup("")
+                        }
+                    )
+                    .transition(
+                        .opacity.combined(
+                            with: .scale(scale: 0.96)
+                        )
+                    )
+                    .zIndex(20)
+                }
             }
             .frame(
                 width: screenGeometry.size.width,
@@ -69,10 +77,16 @@ struct ContentView: View {
         }
         .ignoresSafeArea(.keyboard, edges: .bottom)
         .animation(
-            .easeOut(duration: 0.22),
+            .easeInOut(duration: 0.22),
             value: showingSearch
         )
+        .animation(
+            .easeInOut(duration: 0.22),
+            value: showingNameSetup
+        )
         .task {
+            showingNameSetup = !hasCompletedNameSetup
+
             await viewModel.loadSavedOrDefaultLocation()
         }
     }
@@ -86,9 +100,11 @@ struct ContentView: View {
                 GreetingHeader(
                     cityName: weather.cityName,
                     condition: weather.condition,
-                    greeting: greeting,
+                    greeting: greetingText,
                     onSearchTapped: {
-                        withAnimation {
+                        withAnimation(
+                            .easeInOut(duration: 0.22)
+                        ) {
                             showingSearch = true
                         }
                     },
@@ -136,6 +152,18 @@ struct ContentView: View {
         }
     }
 
+    private var searchBackdrop: some View {
+        Color.black
+            .opacity(0.18)
+            .background(.ultraThinMaterial)
+            .ignoresSafeArea()
+            .transition(.opacity)
+            .zIndex(9)
+            .onTapGesture {
+                closeSearch()
+            }
+    }
+
     private var loadingView: some View {
         ProgressView("Loading weather...")
             .tint(.white)
@@ -161,7 +189,7 @@ struct ContentView: View {
 
             Button("Try again") {
                 Task {
-                    await viewModel.loadGlasgowWeather()
+                    await viewModel.loadSavedOrDefaultLocation()
                 }
             }
             .buttonStyle(.borderedProminent)
@@ -185,6 +213,42 @@ struct ContentView: View {
 
         default:
             return "Good Evening"
+        }
+    }
+
+    private var greetingText: String {
+        let cleanedName = userFirstName.trimmingCharacters(
+            in: .whitespacesAndNewlines
+        )
+
+        guard !cleanedName.isEmpty else {
+            return greeting
+        }
+
+        return "\(greeting), \(cleanedName)"
+    }
+
+    private func closeSearch() {
+        withAnimation(
+            .easeInOut(duration: 0.22)
+        ) {
+            showingSearch = false
+            viewModel.clearSearch()
+        }
+    }
+
+    private func saveNameAndDismissSetup(
+        _ name: String
+    ) {
+        userFirstName = name.trimmingCharacters(
+            in: .whitespacesAndNewlines
+        )
+
+        withAnimation(
+            .easeInOut(duration: 0.22)
+        ) {
+            hasCompletedNameSetup = true
+            showingNameSetup = false
         }
     }
 }
