@@ -10,6 +10,7 @@ struct WeatherBottomSheet: View {
     let windSpeed: String
     let windDirection: String
     let condition: String
+    let weatherCode: Int
     let hourlyForecastItems: [HourlyForecastItem]
 
     @State private var sheetOffset: CGFloat = 0
@@ -168,7 +169,11 @@ struct WeatherBottomSheet: View {
             Spacer()
 
             Circle()
-                .fill(Color(hex: "#1C99FF"))
+                .fill(
+                    WeatherConditionStyle
+                        .from(weatherCode: weatherCode)
+                        .colour
+                )
                 .frame(width: 30, height: 30)
         }
         .padding(.bottom, 35)
@@ -237,7 +242,8 @@ struct WeatherBottomSheet: View {
             ForEach(hourlyForecastItems) { hourlyItem in
                 hourlyWeather(
                     time: hourlyItem.time,
-                    temperature: hourlyItem.temperature
+                    temperature: hourlyItem.temperature,
+                    weatherCode: hourlyItem.weatherCode
                 )
             }
         }
@@ -245,7 +251,8 @@ struct WeatherBottomSheet: View {
 
     private func hourlyWeather(
         time: String,
-        temperature: String
+        temperature: String,
+        weatherCode: Int
     ) -> some View {
         VStack(spacing: 16) {
             Text(time)
@@ -259,7 +266,11 @@ struct WeatherBottomSheet: View {
                 .foregroundStyle(.white)
 
             Circle()
-                .fill(Color(hex: "#1C99FF"))
+                .fill(
+                    WeatherConditionStyle
+                        .from(weatherCode: weatherCode)
+                        .colour
+                )
                 .frame(width: 23, height: 23)
         }
         .frame(maxWidth: .infinity)

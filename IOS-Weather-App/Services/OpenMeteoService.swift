@@ -182,7 +182,8 @@ struct OpenMeteoService {
                 ),
                 temperature: formattedTemperature(
                     hourly.temperature2m[index]
-                )
+                ),
+                weatherCode: hourly.weatherCode[index]
             )
         }
     }
