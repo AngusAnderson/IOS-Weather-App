@@ -2,10 +2,13 @@ import SwiftUI
 
 struct ContentView: View {
     @State private var viewModel = WeatherViewModel()
+
     @State private var showingSearch = false
     @State private var showingNameSetup = false
+    @State private var showingHelp = false
 
     @AppStorage("userFirstName") private var userFirstName = ""
+
     @AppStorage("hasCompletedNameSetup")
     private var hasCompletedNameSetup = false
 
@@ -89,6 +92,35 @@ struct ContentView: View {
 
             await viewModel.loadSavedOrDefaultLocation()
         }
+        .sheet(isPresented: $showingHelp) {
+            HelpSettingsView(
+                userFirstName: userFirstName,
+                onChangeName: {
+                    showingHelp = false
+
+                    DispatchQueue.main.asyncAfter(
+                        deadline: .now() + 0.25
+                    ) {
+                        showingNameSetup = true
+                    }
+                },
+                onResetName: {
+                    userFirstName = ""
+                    hasCompletedNameSetup = false
+
+                    showingHelp = false
+
+                    DispatchQueue.main.asyncAfter(
+                        deadline: .now() + 0.25
+                    ) {
+                        showingNameSetup = true
+                    }
+                }
+            )
+            .presentationDetents([.medium, .large])
+            .presentationDragIndicator(.visible)
+            .presentationCornerRadius(28)
+        }
     }
 
     @ViewBuilder
@@ -113,7 +145,9 @@ struct ContentView: View {
                             await viewModel.loadSavedOrDefaultLocation()
                         }
                     },
-                    onHelpTapped: {}
+                    onHelpTapped: {
+                        showingHelp = true
+                    }
                 )
                 .ignoresSafeArea(.container, edges: .top)
                 .offset(y: 5)
@@ -150,6 +184,7 @@ struct ContentView: View {
                         Color.black.opacity(0.35),
                         in: Capsule()
                     )
+                    .accessibilityLabel("Refreshing weather")
             }
         }
     }
