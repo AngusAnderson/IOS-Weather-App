@@ -241,16 +241,9 @@ struct ContentView: View {
             from: Date()
         )
 
-        switch hour {
-        case 5..<12:
-            return "Good Morning"
-
-        case 12..<18:
-            return "Good Afternoon"
-
-        default:
-            return "Good Evening"
-        }
+        return GreetingProvider.greeting(
+            for: hour
+        )
     }
 
     private var greetingText: String {

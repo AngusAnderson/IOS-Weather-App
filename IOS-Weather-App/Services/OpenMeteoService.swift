@@ -178,10 +178,10 @@ struct OpenMeteoService {
                 forecast.daily.uvIndexMax.first
             ),
             windSpeed: "\(Int(current.windSpeed10m.rounded())) km/h",
-            windDirection: compassDirection(
-                from: current.windDirection10m
+            windDirection: WindDirection.from(
+                degrees: current.windDirection10m
             ),
-            hourlyForecast: makeHourlyForecast(
+            hourlyForecast: HourlyForecastBuilder.makeForecast(
                 from: forecast.hourly,
                 currentTime: current.time
             )
@@ -294,22 +294,6 @@ struct OpenMeteoService {
         }
 
         return String(Int(value.rounded()))
-    }
-
-    private func compassDirection(
-        from degrees: Int
-    ) -> String {
-        let directions = [
-            "N", "NE", "E", "SE",
-            "S", "SW", "W", "NW"
-        ]
-
-        let normalisedDegrees = (degrees % 360 + 360) % 360
-        let index = Int(
-            (Double(normalisedDegrees) + 22.5) / 45
-        ) % directions.count
-
-        return directions[index]
     }
 
     private func weatherDescription(
