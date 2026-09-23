@@ -1,25 +1,57 @@
-# Xcode
+# Nothing gets passed this bad boy.
+
+# macOS
 .DS_Store
-DerivedData/
+
+# Xcode user-specific files
+xcuserdata/
 *.xcuserstate
 *.xccheckout
+*.xcscmblueprint
 *.moved-aside
 *.hmap
-*.ipa
-*.dSYM.zip
-*.dSYM
 
-# Build
+# Xcode build products and derived data
+DerivedData/
 build/
+Build/
 *.o
 *.a
+*.ipa
+*.xcarchive
+*.dSYM
+*.dSYM.zip
 
 # Swift Package Manager
 .swiftpm/
 Packages/
+Package.resolved
 
 # CocoaPods
 Pods/
 
 # Carthage
 Carthage/Build/
+
+# Fastlane output, if added later
+fastlane/report.xml
+fastlane/Preview.html
+fastlane/screenshots/
+fastlane/test_output/
+
+# Apple code-signing material
+*.mobileprovision
+*.provisionprofile
+*.p12
+*.cer
+
+# Environment variables, local configuration, and secrets
+.env
+.env.*
+*.pem
+*.key
+
+# Local exports and scratch files
+ExportOptions.plist
+*.tmp
+*.log
