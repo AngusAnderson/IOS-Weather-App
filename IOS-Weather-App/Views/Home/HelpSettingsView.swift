@@ -122,10 +122,17 @@ struct HelpSettingsView: View {
             .tint(Color(hex: "#1C99FF"))
             Text("""
                 Made by Angus the Anderson
-                API by Open-Meteo
-
                 Nothing is stored on Servers, only your phone
                 """)
+                .font(.system(size: 12))
+                .foregroundStyle(Color.white.opacity(0.66))
+
+            Link(
+                "Weather data by Open-Meteo.com",
+                destination: URL(
+                    string: "https://open-meteo.com/"
+                )!
+            )
             .font(.system(size: 12))
             .foregroundStyle(Color.white.opacity(0.66))
         }
