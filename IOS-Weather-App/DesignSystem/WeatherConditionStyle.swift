@@ -45,22 +45,22 @@ enum WeatherConditionStyle {
     var colour: Color {
         switch self {
         case .clear:
-            return Color(hex: "#1C99FF")
+            return Color(hex: "#F7B538")
 
         case .cloudy:
-            return Color(hex: "#A8A8A8")
+            return Color(hex: "#DEDEDE")
 
         case .fog:
-            return Color(hex: "#8B9AA8")
+            return Color(hex: "#4D4D4D")
 
         case .drizzle:
-            return Color(hex: "#528BBE")
+            return Color(hex: "#74B4D9")
 
         case .rain:
-            return Color(hex: "#2468C9")
+            return Color(hex: "#1C99FF")
 
         case .snowOrFreezing:
-            return Color(hex: "#C7E5FF")
+            return Color(hex: "#FFFACD")
 
         case .thunderstorm:
             return Color(hex: "#8064D8")
