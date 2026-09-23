@@ -1,3 +1,9 @@
+▗▄▄▖  ▗▄▖ ▗▖ ▗▖  ▗▖    ▗▖ ▗▖▗▄▄▄▖ ▗▄▖▗▄▄▄▖▗▖ ▗▖▗▄▄▄▖▗▄▄▖ 
+▐▌ ▐▌▐▌ ▐▌▐▌  ▝▚▞▘     ▐▌ ▐▌▐▌   ▐▌ ▐▌ █  ▐▌ ▐▌▐▌   ▐▌ ▐▌
+▐▛▀▘ ▐▌ ▐▌▐▌   ▐▌      ▐▌ ▐▌▐▛▀▀▘▐▛▀▜▌ █  ▐▛▀▜▌▐▛▀▀▘▐▛▀▚▖
+▐▌   ▝▚▄▞▘▐▙▄▄▖▐▌      ▐▙█▟▌▐▙▄▄▖▐▌ ▐▌ █  ▐▌ ▐▌▐▙▄▄▖▐▌ ▐▌
+                                                         
+
 # iOS Weather App
 
 Weather application made using SwiftUI that provides live weather conditions, hourly forecasts, city search, and a colour based weather system that is powered by the Open-Meteo API.
