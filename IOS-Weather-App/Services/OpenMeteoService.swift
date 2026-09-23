@@ -22,8 +22,17 @@ enum WeatherServiceError: LocalizedError {
 struct OpenMeteoService {
     private let session: URLSession
 
-    init(session: URLSession = .shared) {
+    init(session: URLSession = OpenMeteoService.makeSession()) {
         self.session = session
+    }
+
+    private static func makeSession() -> URLSession {
+        let configuration = URLSessionConfiguration.ephemeral
+        configuration.timeoutIntervalForRequest = 15
+        configuration.timeoutIntervalForResource = 30
+        configuration.waitsForConnectivity = true
+
+        return URLSession(configuration: configuration)
     }
 
     func searchLocations(
