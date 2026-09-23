@@ -6,27 +6,92 @@ import Observation
 final class WeatherViewModel {
     private let weatherService = OpenMeteoService()
     private let lastLocationKey = "lastSelectedWeatherLocation"
+    private let networkMonitor = NetworkMonitor.shared
 
     var weather: WeatherViewData?
     var isLoading = false
     var errorMessage: String?
+    var lastUpdated: Date?
+    var lastUpdatedOnError: Date?
 
     var searchText = ""
     var searchResults: [LocationSearchResult] = []
     var isSearching = false
 
+    init() {
+        loadCachedWeather()
+    }
+
+    func loadSavedOrDefaultLocation() async {
+        isLoading = true
+        errorMessage = nil
+
+        if !networkMonitor.isReachable() {
+            let cached = WeatherCache.load()
+            if let cached {
+                weather = cached
+                lastUpdated = WeatherCache.loadTimestamp()
+                lastUpdatedOnError = lastUpdated
+            } else {
+                weather = nil
+                lastUpdated = nil
+                lastUpdatedOnError = nil
+                errorMessage = "No internet connection"
+            }
+            isLoading = false
+            return
+        }
+
+        if let savedLocation = loadSavedLocation() {
+            await loadWeather(for: savedLocation)
+        } else {
+            await loadGlasgowWeather()
+        }
+    }
+
     func loadWeather(
         for location: LocationSearchResult
     ) async {
+        if !networkMonitor.isReachable() {
+            let cached = WeatherCache.load()
+            if let cached {
+                weather = cached
+                lastUpdated = WeatherCache.loadTimestamp()
+                lastUpdatedOnError = lastUpdated
+            } else {
+                weather = nil
+                lastUpdated = nil
+                lastUpdatedOnError = nil
+                errorMessage = "No internet connection"
+            }
+            isLoading = false
+            return
+        }
+
         isLoading = true
         errorMessage = nil
 
         do {
-            weather = try await weatherService.fetchWeather(
+            let fetched = try await weatherService.fetchWeather(
                 for: location
             )
+            weather = fetched
+            lastUpdated = Date()
+            lastUpdatedOnError = nil
+            WeatherCache.save(fetched)
         } catch {
             errorMessage = error.localizedDescription
+
+            let cached = WeatherCache.load()
+            if let cached {
+                weather = cached
+                lastUpdated = WeatherCache.loadTimestamp()
+                lastUpdatedOnError = lastUpdated
+            } else {
+                weather = nil
+                lastUpdated = nil
+                lastUpdatedOnError = nil
+            }
         }
 
         isLoading = false
@@ -98,14 +163,6 @@ final class WeatherViewModel {
         searchResults = []
     }
 
-    func loadSavedOrDefaultLocation() async {
-        if let savedLocation = loadSavedLocation() {
-            await loadWeather(for: savedLocation)
-        } else {
-            await loadGlasgowWeather()
-        }
-    }
-
     private func saveLocation(
         _ location: LocationSearchResult
     ) {
@@ -145,5 +202,10 @@ final class WeatherViewModel {
         }
 
         return location
+    }
+
+    private func loadCachedWeather() {
+        weather = WeatherCache.load()
+        lastUpdated = WeatherCache.loadTimestamp()
     }
 }

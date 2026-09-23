@@ -32,7 +32,7 @@ struct ContentView: View {
                             edges: .bottom
                         )
 
-                } else if let errorMessage = viewModel.errorMessage {
+                } else if let errorMessage = viewModel.errorMessage, viewModel.weather == nil {
                     errorView(errorMessage)
 
                 } else {
@@ -89,7 +89,6 @@ struct ContentView: View {
         )
         .task {
             showingNameSetup = !hasCompletedNameSetup
-
             await viewModel.loadSavedOrDefaultLocation()
         }
         .sheet(isPresented: $showingHelp) {
@@ -133,6 +132,7 @@ struct ContentView: View {
                     cityName: weather.cityName,
                     condition: weather.condition,
                     greeting: greetingText,
+                    lastUpdated: viewModel.lastUpdatedOnError,
                     onSearchTapped: {
                         withAnimation(
                             .easeInOut(duration: 0.22)
@@ -175,17 +175,6 @@ struct ContentView: View {
                 weatherCode: weather.weatherCode,
                 hourlyForecastItems: weather.hourlyForecast
             )
-
-            if viewModel.isLoading {
-                ProgressView()
-                    .tint(.white)
-                    .padding(16)
-                    .background(
-                        Color.black.opacity(0.35),
-                        in: Capsule()
-                    )
-                    .accessibilityLabel("Refreshing weather")
-            }
         }
     }
 

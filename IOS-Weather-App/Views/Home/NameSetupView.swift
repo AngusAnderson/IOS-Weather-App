@@ -70,7 +70,7 @@ struct NameSetupView: View {
                 .tint(Color(hex: "#1C99FF"))
                 .disabled(cleanedName.isEmpty)
 
-                Button("Skip for now") {
+                Button("Skip") {
                     onSkip()
                 }
                 .buttonStyle(.plain)
