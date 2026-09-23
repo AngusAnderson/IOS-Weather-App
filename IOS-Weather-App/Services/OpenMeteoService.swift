@@ -192,27 +192,37 @@ struct OpenMeteoService {
         from hourly: HourlyWeather,
         currentTime: String
     ) -> [HourlyForecastItem] {
+        let safeCount = min(
+            hourly.time.count,
+            hourly.temperature2m.count,
+            hourly.weatherCode.count
+        )
+
+        guard safeCount > 0 else {
+            return []
+        }
+
         let currentHour = String(currentTime.prefix(13))
 
-        let currentIndex = hourly.time.firstIndex {
+        let currentIndex = hourly.time.prefix(safeCount).firstIndex {
             String($0.prefix(13)) >= currentHour
         } ?? 0
 
         let startIndex = min(
             currentIndex + 1,
-            hourly.time.count
+            safeCount
         )
 
         let endIndex = min(
             startIndex + 6,
-            hourly.time.count
+            safeCount
         )
 
         guard startIndex < endIndex else {
             return []
         }
 
-        return hourly.time[startIndex..<endIndex].indices.map { index in
+        return (startIndex..<endIndex).map { index in
             HourlyForecastItem(
                 time: formattedHour(
                     from: hourly.time[index]
