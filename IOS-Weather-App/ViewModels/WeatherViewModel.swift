@@ -5,10 +5,15 @@ import Observation
 @MainActor
 final class WeatherViewModel {
     private let weatherService = OpenMeteoService()
+    private let lastLocationKey = "lastSelectedWeatherLocation"
 
     var weather: WeatherViewData?
     var isLoading = false
     var errorMessage: String?
+
+    var searchText = ""
+    var searchResults: [LocationSearchResult] = []
+    var isSearching = false
 
     func loadWeather(
         for location: LocationSearchResult
@@ -39,5 +44,90 @@ final class WeatherViewModel {
         )
 
         await loadWeather(for: glasgow)
+    }
+
+    func searchLocations() async {
+        let query = searchText.trimmingCharacters(
+            in: .whitespacesAndNewlines
+        )
+
+        guard query.count >= 2 else {
+            searchResults = []
+            return
+        }
+
+        isSearching = true
+
+        do {
+            searchResults = try await weatherService.searchLocations(
+                named: query
+            )
+        } catch {
+            searchResults = []
+        }
+
+        isSearching = false
+    }
+
+    func selectLocation(
+        _ location: LocationSearchResult
+    ) async {
+        searchText = location.name
+        searchResults = []
+
+        saveLocation(location)
+
+        await loadWeather(for: location)
+    }
+
+    func clearSearch() {
+        searchText = ""
+        searchResults = []
+    }
+
+    func loadSavedOrDefaultLocation() async {
+        if let savedLocation = loadSavedLocation() {
+            await loadWeather(for: savedLocation)
+        } else {
+            await loadGlasgowWeather()
+        }
+    }
+
+    private func saveLocation(
+        _ location: LocationSearchResult
+    ) {
+        do {
+            let data = try JSONEncoder().encode(location)
+
+            UserDefaults.standard.set(
+                data,
+                forKey: lastLocationKey
+            )
+        } catch {
+            print("Could not save selected location:", error)
+        }
+    }
+
+    private func loadSavedLocation() -> LocationSearchResult? {
+        guard let data = UserDefaults.standard.data(
+            forKey: lastLocationKey
+        ) else {
+            return nil
+        }
+
+        do {
+            return try JSONDecoder().decode(
+                LocationSearchResult.self,
+                from: data
+            )
+        } catch {
+            print("Could not load saved location:", error)
+
+            UserDefaults.standard.removeObject(
+                forKey: lastLocationKey
+            )
+
+            return nil
+        }
     }
 }

@@ -2,29 +2,78 @@ import SwiftUI
 
 struct ContentView: View {
     @State private var viewModel = WeatherViewModel()
-
-    @State private var lastAction = ""
+    @State private var showingSearch = false
 
     var body: some View {
-        ZStack {
-            Color(hex: "#3D3D3D")
-                .ignoresSafeArea()
+        GeometryReader { screenGeometry in
+            ZStack {
+                Color(hex: "#3D3D3D")
+                    .ignoresSafeArea()
 
-            if viewModel.isLoading && viewModel.weather == nil {
-                loadingView
+                if viewModel.isLoading && viewModel.weather == nil {
+                    loadingView
 
-            } else if let weather = viewModel.weather {
-                weatherContent(weather)
+                } else if let weather = viewModel.weather {
+                    weatherContent(weather)
+                        .frame(
+                            width: screenGeometry.size.width,
+                            height: screenGeometry.size.height
+                        )
+                        .ignoresSafeArea(
+                            .keyboard,
+                            edges: .bottom
+                        )
 
-            } else if let errorMessage = viewModel.errorMessage {
-                errorView(errorMessage)
+                } else if let errorMessage = viewModel.errorMessage {
+                    errorView(errorMessage)
 
-            } else {
-                loadingView
+                } else {
+                    loadingView
+                }
+
+                if showingSearch {
+                    Color.black
+                        .opacity(0.18)
+                        .background(.ultraThinMaterial)
+                        .ignoresSafeArea()
+                        .transition(.opacity)
+                        .zIndex(9)
+                        .onTapGesture {
+                            withAnimation(.easeOut(duration: 0.22)) {
+                                showingSearch = false
+                                viewModel.clearSearch()
+                            }
+                        }
+
+                    WeatherSearchOverlay(
+                        viewModel: viewModel,
+                        onDismiss: {
+                            withAnimation(.easeOut(duration: 0.22)) {
+                                showingSearch = false
+                                viewModel.clearSearch()
+                            }
+                        }
+                    )
+                    .transition(
+                        .opacity.combined(
+                            with: .scale(scale: 0.96)
+                        )
+                    )
+                    .zIndex(10)
+                }
             }
+            .frame(
+                width: screenGeometry.size.width,
+                height: screenGeometry.size.height
+            )
         }
+        .ignoresSafeArea(.keyboard, edges: .bottom)
+        .animation(
+            .easeOut(duration: 0.22),
+            value: showingSearch
+        )
         .task {
-            await viewModel.loadGlasgowWeather()
+            await viewModel.loadSavedOrDefaultLocation()
         }
     }
 
@@ -39,18 +88,16 @@ struct ContentView: View {
                     condition: weather.condition,
                     greeting: greeting,
                     onSearchTapped: {
-                        lastAction = "search tapped"
-                    },
-                    onRefreshTapped: {
-                        lastAction = "refresh tapped"
-
-                        Task {
-                            await viewModel.loadGlasgowWeather()
+                        withAnimation {
+                            showingSearch = true
                         }
                     },
-                    onHelpTapped: {
-                        lastAction = "help tapped"
-                    }
+                    onRefreshTapped: {
+                        Task {
+                            await viewModel.loadSavedOrDefaultLocation()
+                        }
+                    },
+                    onHelpTapped: {}
                 )
                 .ignoresSafeArea(.container, edges: .top)
                 .offset(y: 5)
@@ -60,10 +107,6 @@ struct ContentView: View {
                     condition: weather.condition
                 )
                 .offset(y: -25)
-
-                Text(lastAction)
-                    .accessibilityIdentifier(actionIdentifier)
-                    .padding()
 
                 Spacer()
             }
@@ -89,7 +132,6 @@ struct ContentView: View {
                         Color.black.opacity(0.35),
                         in: Capsule()
                     )
-                    .accessibilityLabel("Refreshing weather")
             }
         }
     }
@@ -143,22 +185,6 @@ struct ContentView: View {
 
         default:
             return "Good Evening"
-        }
-    }
-
-    private var actionIdentifier: String {
-        switch lastAction {
-        case "search tapped":
-            return "searchTappedMessage"
-
-        case "help tapped":
-            return "helpTappedMessage"
-
-        case "refresh tapped":
-            return "refreshTappedMessage"
-
-        default:
-            return "noActionMessage"
         }
     }
 }
