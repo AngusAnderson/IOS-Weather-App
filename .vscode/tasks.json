@@ -14,6 +14,7 @@
         "-destination",
         "platform=iOS,id=00008110-001835D41453801E",
         "-allowProvisioningUpdates",
+        "-only-testing:IOS-Weather-AppUIUnitTests"
       ],
       "group": {
         "kind": "test",
