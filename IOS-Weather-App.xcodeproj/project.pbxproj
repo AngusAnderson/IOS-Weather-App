@@ -48,16 +48,6 @@
 			path = "IOS-Weather-App";
 			sourceTree = "<group>";
 		};
-		70D5ED21305C9FEC00D009D5 /* IOS-Weather-AppUITests */ = {
-			isa = PBXFileSystemSynchronizedRootGroup;
-			path = "IOS-Weather-AppUITests";
-			sourceTree = "<group>";
-		};
-		70D5ED2E305CA03300D009D5 /* IOS-Weather-AppUITests */ = {
-			isa = PBXFileSystemSynchronizedRootGroup;
-			path = "IOS-Weather-AppUITests";
-			sourceTree = "<group>";
-		};
 		70D5ED3B305CA04700D009D5 /* IOS-Weather-AppUIUnitTests */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			path = "IOS-Weather-AppUIUnitTests";
@@ -88,8 +78,6 @@
 			isa = PBXGroup;
 			children = (
 				000000000000000000000010 /* IOS-Weather-App */,
-				70D5ED21305C9FEC00D009D5 /* IOS-Weather-AppUITests */,
-				70D5ED2E305CA03300D009D5 /* IOS-Weather-AppUITests */,
 				70D5ED3B305CA04700D009D5 /* IOS-Weather-AppUIUnitTests */,
 				000000000000000000000020 /* Products */,
 			);
@@ -138,9 +126,6 @@
 			);
 			dependencies = (
 				70D5ED32305CA03300D009D5 /* PBXTargetDependency */,
-			);
-			fileSystemSynchronizedGroups = (
-				70D5ED2E305CA03300D009D5 /* IOS-Weather-AppUITests */,
 			);
 			name = "IOS-Weather-AppUITests";
 			productName = "IOS-Weather-AppUITests";
@@ -407,7 +392,7 @@
 				ENABLE_USER_SELECTED_FILES = readonly;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = "IOS-Weather-App/Info.plist";
-				INFOPLIST_KEY_CFBundleDisplayName = "Jones Alert";
+				INFOPLIST_KEY_CFBundleDisplayName = "Poly Weather";
 				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphoneos*]" = YES;
 				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphonesimulator*]" = YES;
 				"INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents[sdk=iphoneos*]" = YES;
@@ -449,7 +434,7 @@
 				ENABLE_USER_SELECTED_FILES = readonly;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = "IOS-Weather-App/Info.plist";
-				INFOPLIST_KEY_CFBundleDisplayName = "Jones Alert";
+				INFOPLIST_KEY_CFBundleDisplayName = "Poly Weather";
 				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphoneos*]" = YES;
 				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphonesimulator*]" = YES;
 				"INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents[sdk=iphoneos*]" = YES;
