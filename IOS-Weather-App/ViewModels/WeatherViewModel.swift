@@ -26,7 +26,6 @@ final class WeatherViewModel {
         isLoading = true
         errorMessage = nil
 
-        // Immediate offline check before any API work
         if !networkMonitor.isReachable() {
             let cached = WeatherCache.load()
             if let cached {
@@ -43,7 +42,6 @@ final class WeatherViewModel {
             return
         }
 
-        // Online: normal flow
         if let savedLocation = loadSavedLocation() {
             await loadWeather(for: savedLocation)
         } else {
@@ -54,7 +52,6 @@ final class WeatherViewModel {
     func loadWeather(
         for location: LocationSearchResult
     ) async {
-        // Double-check offline in case called directly
         if !networkMonitor.isReachable() {
             let cached = WeatherCache.load()
             if let cached {
@@ -210,6 +207,5 @@ final class WeatherViewModel {
     private func loadCachedWeather() {
         weather = WeatherCache.load()
         lastUpdated = WeatherCache.loadTimestamp()
-        // Do NOT set lastUpdatedOnError here
     }
 }
