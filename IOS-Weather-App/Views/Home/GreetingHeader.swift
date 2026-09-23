@@ -12,7 +12,7 @@ struct GreetingHeader: View {
     var body: some View {
         HStack(alignment: .top) {
             VStack(alignment: .leading, spacing: 8) {
-                Text("\(greeting), Angus")
+                Text("\(greeting)")
                     .font(Font.custom("RobotoMono-Regular", size: 22))
                     .tracking(20 * 0.04)
                     .accessibilityIdentifier("greetingHeader.greetingText")
