@@ -52,6 +52,5 @@ fastlane/test_output/
 *.key
 
 # Local exports and scratch files
-ExportOptions.plist
 *.tmp
 *.log
