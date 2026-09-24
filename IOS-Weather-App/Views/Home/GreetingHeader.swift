@@ -16,11 +16,13 @@ struct GreetingHeader: View {
                 Text("\(greeting)")
                     .font(Font.custom("RobotoMono-Regular", size: 22))
                     .tracking(20 * 0.04)
+                    .foregroundStyle(.white)
                     .accessibilityIdentifier("greetingHeader.greetingText")
 
                 Text("\(cityName) • \(condition)")
                     .font(Font.custom("RobotoMono-Regular", size: 18))
                     .tracking(16 * 0.04)
+                    .foregroundStyle(.white)
                     .accessibilityIdentifier("greetingHeader.LocationConditionText")
 
                 if let lastUpdated {
