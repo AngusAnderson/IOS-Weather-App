@@ -43,12 +43,20 @@ IOS-Weather-App/
 ├── DesignSystem/
 │   ├── Color+Hex.swift
 │   └── WeatherConditionStyle.swift
+├── Fonts/
+|   ├── RobotoMono-Italic.ttf
+|   └── RobotoMono-Regular.ttf
 ├── Models/
 │   ├── LocationSearchResult.swift
 │   ├── OpenMeteoResponse.swift
 │   └── WeatherViewData.swift
 ├── Services/
-│   └── OpenMeteoService.swift
+│   ├── OpenMeteoService.swift
+|   └── NetworkMonitor.swift
+├── Utilities/
+|   ├── GreetingProvider.swift
+|   ├── HourlyForecastBuilder.swift
+|   └── WindDirection.swift
 ├── ViewModels/
 │   └── WeatherViewModel.swift
 ├── Views/
@@ -59,9 +67,9 @@ IOS-Weather-App/
 │       ├── WeatherBottomSheet.swift
 │       ├── WeatherSearchOverlay.swift
 │       ├── NameSetupView.swift
-│       └── HelpSettingsView.swift
+│       ├── HelpSettingsView.swift
 │       └── Buttons/
-│           └── ControlButtonStyle.swift
+│           ├── ControlButtonStyle.swift
 │           └── SearchButtonStyle.swift
 └── WeatherApp.swift
 ```
